@@ -1,3 +1,11 @@
 # getting-started-git
 
-This project walks through the basics of cloning a Git repository in order to view and edit an analysis.
+This project walks through the basics of Git for the purpose of a data science project.
+
+## data
+
+contains the data used in the analysis
+
+## src
+
+stores source code and scripts used in the project
