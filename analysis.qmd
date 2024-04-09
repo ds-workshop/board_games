@@ -77,20 +77,11 @@ BoardGameGeek aggregates ratings by thousands of users.
 Find the oldest game in this dataset. Display its game_id, name, yearpublished.
 
 ```{r}
-
-games |>
-    slice_min(order_by = yearpublished, n = 1) |>
-    select(name, game_id, yearpublished)
-
 ```
 
 What is this game? Display its description.
 
 ```{r}
-
-games |>
-    slice_min(order_by = yearpublished, n = 1) |>
-    pull(description)
 
 ```
 
@@ -99,20 +90,6 @@ games |>
 Find the top 5 highest/lowest rated games based on *bayesaverage*. Display their game_id, name, yearpublished, bayesaverage, and averageweight.
 
 ```{r}
-
-top_n = 5
-
-top_games = 
-    games |>
-    slice_max(order_by = bayesaverage, n = top_n) 
-
-worst_games = 
-    games |>
-    slice_min(order_by = bayesaverage, n = top_n) 
-
-top_games |>
-    bind_rows(worst_games) |>
-    select(game_id, name, yearpublished, bayesaverage, averageweight)
 
 ```
 
@@ -123,25 +100,11 @@ Find the correlation between the BGG average rating (*average*) and **averagewei
 
 ```{r}
 
-games |>
-    select(average, averageweight) |>
-    na.omit() |>
-    cor()
-
 ```
 
 Display this relationship visually by making a scatter plot with *averageweight* on the x axis and and average on the y axis. (It might help to jitter the x axis slightly for visibility).
 
 ```{r}
-#| message: false
-#| warning: false
-#| label: scatter-average-by-averageweight
-games |>
-    ggplot(aes(x=averageweight,
-               y=average))+
-    geom_point(alpha = 0.5,
-               position = position_jitter(width = 0.05)
-    )
 
 ```
 
