@@ -1,0 +1,110 @@
+---
+title: "Analysis"
+format: 
+    gfm:
+        toc: true
+        echo: true
+        message: false
+        warning: false
+editor: visual
+
+---
+
+How have board games been rated by the BoardGameGeek (BGG) community over time? This analysis looks at historical games and their ratings on BGG.
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+#| label: setup
+#| echo: true
+
+# packages
+library(tidyverse)
+library(bggUtils)
+
+# data
+games = read_csv('data/processed/games_historical.csv')
+
+# set custom ggplot theme
+theme_set(
+    bggUtils::theme_bgg()
+)
+
+```
+
+# Data
+
+The data comes from BoardGameGeek.com and contains `r nrow(games)` games.
+
+```{r}
+
+games |>
+    sample_n(5)
+
+```
+
+```{r}
+#| label: plot-games-by-year
+#| warning: false
+#| message: false
+
+games |>
+    filter(yearpublished > 1900) |>
+    group_by(yearpublished) |>
+    count() |>
+    ggplot(aes(x=yearpublished, y=n))+
+    geom_col()
+
+```
+
+The dataset contains games earlier than the 1900s, but the majority of games in the dataset were published in the last 30 years.
+
+BoardGameGeek aggregates ratings by thousands of users.
+
+- **average**: average rating on a 0-10 scale by all users that have rated the game
+
+- **usersrated**: the number of users that have rated the game
+
+- **averageweight**: complexity of a game on a 1-5 scale, with 1 being simple and 5 being complex
+
+- **bayesaverage**: also known as the Geek rating, a Bayesian average of the community's average rating
+
+# Questions
+
+### What is the oldest game?
+
+Find the oldest game in this dataset. Display its game_id, name, yearpublished.
+
+```{r}
+```
+
+What is this game? Display its description.
+
+```{r}
+
+```
+
+### What are the highest and lowest rated games?
+
+Find the top 5 highest/lowest rated games based on *bayesaverage*. Display their game_id, name, yearpublished, bayesaverage, and averageweight.
+
+```{r}
+
+```
+
+
+### What is the relationship between **average** and **averageweight**?
+
+Find the correlation between the BGG average rating (*average*) and **averageweight**.
+
+```{r}
+
+```
+
+Display this relationship visually by making a scatter plot with *averageweight* on the x axis and and average on the y axis. (It might help to jitter the x axis slightly for visibility).
+
+```{r}
+
+```
+
