@@ -1,11 +1,17 @@
 # getting-started-git
 
-This project walks through the basics of Git for the purpose of a data science project.
+this project contains data and code for the purpose of teaching Git concepts for analysis and collaboration
 
 ## data
 
-contains the data used in the analysis
+contains data used in the analysis.
 
 ## src
 
-stores source code and scripts used in the project
+stores source code (functions, scripts) used in project
+
+### analysis
+
+*analysis.qmd* is a [Quarto](https://quarto.org/docs/get-started/) doc containing analyses and question to be answered.
+
+[instructions on how to set up Quarto](https://quarto.org/docs/get-started/)
