@@ -1,0 +1,156 @@
+---
+title: "Reverse Engineering the Geek Rating"
+format: 
+    gfm:
+        toc: true
+        echo: true
+        message: false
+        warning: false
+editor: visual
+---
+
+Load games.
+
+```{r}
+#| label: load-games
+#| message: false
+#| warning: false
+# data
+games = read_csv('data/processed/games_historical.csv')
+
+# set custom ggplot theme
+theme_set(
+    bggUtils::theme_bgg()
+)
+
+```
+
+Boardgame geek uses a Bayesian average to calculate the Geek Rating (bayesaverage). We can compare the average rating for games compared to their bayesian average.
+
+```{r}
+#| warning: false
+#| message: false
+games |>
+    ggplot(aes(x=average,
+               y=bayesaverage))+
+    geom_jitter(alpha = 0.25)
+```
+
+Comparing the distributions of average and bayesaverage.
+
+```{r}
+#| message: false
+#| warning: false
+
+games |>
+    pivot_longer(
+        cols = c(average, bayesaverage),
+        names_to = c("outcome")
+    ) |>
+    ggplot(aes(x=value,
+               y=outcome))+
+    ggridges::stat_density_ridges(quantile_lines = T,
+                                  quantiles = 2)
+
+
+```
+
+So how do they calculate this?
+
+```{r}
+#| message: false
+#| warning: false
+
+games |>
+    ggplot(aes(x=average,
+               y = log(usersrated)))+
+    geom_jitter(alpha = 0.5)
+
+```
+
+
+```{r}
+
+params = 
+    expand.grid(
+        ratings = seq(500, 2000, by = 100),
+        average = seq(5, 6, by = 0.1)
+    )
+
+estimates = 
+    map2_df(
+        .x = params$ratings,
+        .y = params$average,
+        ~ games |>
+            mutate(est_bayesaverage = ((average * usersrated) + (.x* .y)) / (usersrated + .x)) |>
+            mutate(dummy_ratings = .x,
+                   dummy_average = .y) |>
+            select(
+                game_id,
+                name,
+                yearpublished,
+                bayesaverage,
+                est_bayesaverage,
+                dummy_ratings,
+                dummy_average
+            )
+    )
+
+```
+
+
+
+```{r}
+
+reg_metrics = yardstick::metric_set(yardstick::rmse,
+                                    yardstick::mae,
+                                    yardstick::rsq)
+
+metrics = 
+    
+    estimates %>%
+    group_by(dummy_ratings, dummy_average) %>%
+    reg_metrics(bayesaverage, est_bayesaverage)
+
+metrics |>
+    mutate(dummy_average = factor(dummy_average)) %>%
+    ggplot(., aes(x=dummy_ratings,
+                  color = dummy_average,
+                  y=.estimate))+
+    geom_line()+
+    scale_color_viridis_d()+
+    geom_hline(yintercept = 0,
+               linetype = 'dotted')+
+    facet_wrap(.metric ~.,
+               ncol = 2,
+               scales = "free_y")
+
+```
+
+```{r}
+
+metrics |>
+    pivot_wider(
+        names_from = c(".metric"),
+        values_from = c(".estimate")
+    ) |>
+    mutate_if(is.numeric, round, 3) |>
+    arrange(desc(rsq)) |>
+    gt::gt() |>
+    gt::as_raw_html()
+
+```
+It looks like we 1800 votes at 5.5 is what they use.
+
+```{r}
+#| message: false
+#| warning: false
+estimates |>
+    filter(dummy_ratings == 1800) |>
+    filter(dummy_average == 5.5) |>
+    ggplot(aes(x=est_bayesaverage,
+               y=bayesaverage))+
+    geom_point()
+
+```
+
