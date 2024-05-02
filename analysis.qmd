@@ -7,7 +7,6 @@ format:
         message: false
         warning: false
 editor: visual
-
 ---
 
 How have board games been rated by the BoardGameGeek (BGG) community over time? This analysis looks at historical games and their ratings on BGG.
@@ -62,13 +61,13 @@ The dataset contains games earlier than the 1900s, but the majority of games in 
 
 BoardGameGeek aggregates ratings by thousands of users.
 
-- **average**: average rating on a 0-10 scale by all users that have rated the game
+-   **average**: average rating on a 0-10 scale by all users that have rated the game
 
-- **usersrated**: the number of users that have rated the game
+-   **usersrated**: the number of users that have rated the game
 
-- **averageweight**: complexity of a game on a 1-5 scale, with 1 being simple and 5 being complex
+-   **averageweight**: complexity of a game on a 1-5 scale, with 1 being simple and 5 being complex
 
-- **bayesaverage**: also known as the Geek rating, a Bayesian average of the community's average rating
+-   **bayesaverage**: also known as the Geek rating, a Bayesian average of the community's average rating
 
 # Questions
 
@@ -77,11 +76,18 @@ BoardGameGeek aggregates ratings by thousands of users.
 Find the oldest game in this dataset. Display its game_id, name, yearpublished.
 
 ```{r}
+oldGame = games %>%
+    dplyr::filter(yearpublished == min(yearpublished))
+
+oldGame
 ```
 
 What is this game? Display its description.
 
 ```{r}
+oldGame %>%
+    select(name,
+           description)
 
 ```
 
@@ -90,21 +96,43 @@ What is this game? Display its description.
 Find the top 5 highest/lowest rated games based on *bayesaverage*. Display their game_id, name, yearpublished, bayesaverage, and averageweight.
 
 ```{r}
+games %>%
+    arrange(desc(bayesaverage)) %>%
+    slice_head(n = 5) %>%
+    select(game_id,
+           name,
+           yearpublished,
+           bayesaverage,
+           averageweight)
 
+games %>%
+    arrange(bayesaverage) %>%
+    slice_head(n = 5) %>%
+    select(game_id,
+           name,
+           yearpublished,
+           bayesaverage,
+           averageweight)
 ```
-
 
 ### What is the relationship between **average** and **averageweight**?
 
 Find the correlation between the BGG average rating (*average*) and **averageweight**.
 
 ```{r}
+games %>%
+    select(average,
+           averageweight) %>%
+    cor(use = 'pairwise.complete')
 
 ```
 
 Display this relationship visually by making a scatter plot with *averageweight* on the x axis and and average on the y axis. (It might help to jitter the x axis slightly for visibility).
 
 ```{r}
+games %>%
+    ggplot(aes(x = averageweight,
+               y = average)) +
+    geom_point(position = 'jitter')
 
 ```
-
